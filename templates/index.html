@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FrameSnap — Video to Image Converter</title>
+  <meta name="description" content="Extract high-quality JPG or PNG frames from MP4, WebM, MOV videos and download them as a ZIP. Free, fast, and private." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <svg class="nav-icon" viewBox="0 0 32 32" fill="none"><rect x="3" y="6" width="26" height="20" rx="4" stroke="currentColor" stroke-width="2.2"/><polygon points="13,11 22,16 13,21" fill="currentColor"/></svg>
+      <span class="nav-title">Frame<span class="accent">Snap</span></span>
+    </div>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#how-it-works" class="nav-link">How It Works</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero" id="hero">
+    <p class="hero-badge">⚡ 100% Client-Side Processing</p>
+    <h1 class="hero-title">Video to <span class="gradient-text">Image</span> Converter</h1>
+    <p class="hero-subtitle">Extract high-quality JPG or PNG frames from MP4, WebM, MOV or AVI videos<br/>and download them all as a ZIP. Fast, free, no signup required.</p>
+  </header>
+
+  <!-- Upload Section -->
+  <main class="main-section">
+    <div class="upload-card glass-card" id="upload-card">
+      <!-- Drop Zone -->
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-inner">
+          <div class="dropzone-icon-wrap">
+            <svg class="dropzone-icon" viewBox="0 0 64 64" fill="none">
+              <rect x="8" y="14" width="48" height="36" rx="6" stroke="currentColor" stroke-width="2.5" stroke-dasharray="6 4"/>
+              <path d="M32 24v16M24 32h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h2 class="dropzone-title">Drop video or <label for="file-input" class="dropzone-browse">browse</label></h2>
+          <p class="dropzone-hint">MP4, WebM, MOV, AVI, MKV — up to 500 MB</p>
+          <input type="file" id="file-input" accept="video/*" hidden />
+        </div>
+      </div>
+
+      <!-- File Selected Info -->
+      <div class="file-info hidden" id="file-info">
+        <div class="file-info-inner">
+          <div class="file-thumb-wrap">
+            <video id="video-preview" muted></video>
+          </div>
+          <div class="file-meta">
+            <p class="file-name" id="file-name"></p>
+            <p class="file-size" id="file-size"></p>
+            <button class="btn-remove" id="btn-remove" title="Remove file">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="options-panel hidden" id="options-panel">
+        <h3 class="options-title">Extraction Settings</h3>
+        <div class="options-grid">
+          <!-- Mode -->
+          <div class="option-group">
+            <label class="option-label">Extraction Mode</label>
+            <div class="toggle-group" id="mode-toggle">
+              <button class="toggle-btn active" data-value="all">All Frames</button>
+              <button class="toggle-btn" data-value="interval">Interval</button>
+            </div>
+          </div>
+          <!-- Interval -->
+          <div class="option-group interval-group hidden" id="interval-group">
+            <label class="option-label" for="interval-input">Interval (seconds)</label>
+            <div class="stepper">
+              <button class="stepper-btn" id="interval-dec">−</button>
+              <input type="number" id="interval-input" value="1" min="0.1" max="60" step="0.1" />
+              <button class="stepper-btn" id="interval-inc">+</button>
+            </div>
+          </div>
+          <!-- Format -->
+          <div class="option-group">
+            <label class="option-label">Output Format</label>
+            <div class="toggle-group" id="format-toggle">
+              <button class="toggle-btn active" data-value="jpg">JPG</button>
+              <button class="toggle-btn" data-value="png">PNG</button>
+            </div>
+          </div>
+          <!-- Quality (JPG only) -->
+          <div class="option-group quality-group" id="quality-group">
+            <label class="option-label" for="quality-slider">JPG Quality: <span id="quality-value">85</span>%</label>
+            <input type="range" id="quality-slider" min="10" max="100" value="85" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Extract Button -->
+      <div class="action-row hidden" id="action-row">
+        <button class="btn-extract" id="btn-extract">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Extract Frames</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-card glass-card hidden" id="progress-card">
+      <div class="progress-header">
+        <div class="spinner"></div>
+        <p class="progress-text" id="progress-text">Uploading & extracting frames...</p>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+      <p class="progress-sub" id="progress-sub">This may take a moment depending on video length</p>
+    </div>
+
+    <!-- Results -->
+    <div class="results-card glass-card hidden" id="results-card">
+      <div class="results-header">
+        <div class="success-icon-wrap">
+          <svg class="success-icon" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M14 24l7 7 13-13" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </div>
+        <h2 class="results-title">Frames Extracted!</h2>
+        <p class="results-subtitle" id="results-subtitle"></p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row" id="stats-row">
+        <div class="stat-pill">
+          <span class="stat-label">Frames</span>
+          <span class="stat-value" id="stat-frames">—</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">Format</span>
+          <span class="stat-value" id="stat-format">—</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">Duration</span>
+          <span class="stat-value" id="stat-duration">—</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">ZIP Size</span>
+          <span class="stat-value" id="stat-zip">—</span>
+        </div>
+      </div>
+
+      <!-- Preview Gallery -->
+      <div class="gallery" id="gallery"></div>
+
+      <!-- Download -->
+      <div class="download-row">
+        <a class="btn-download" id="btn-download" href="#">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download ZIP
+        </a>
+        <button class="btn-new" id="btn-new">Convert Another Video</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Features -->
+  <section class="features-section" id="features">
+    <h2 class="section-title">Why <span class="gradient-text">FrameSnap</span>?</h2>
+    <div class="features-grid">
+      <div class="feature-card glass-card">
+        <div class="feature-icon">🎬</div>
+        <h3>Multiple Formats</h3>
+        <p>Supports MP4, WebM, MOV, AVI, MKV and more video formats.</p>
+      </div>
+      <div class="feature-card glass-card">
+        <div class="feature-icon">⚙️</div>
+        <h3>Custom Interval</h3>
+        <p>Extract all frames or set a custom interval like 1 frame per second.</p>
+      </div>
+      <div class="feature-card glass-card">
+        <div class="feature-icon">🖼️</div>
+        <h3>JPG & PNG</h3>
+        <p>Choose between JPG (smaller) or PNG (lossless) with adjustable quality.</p>
+      </div>
+      <div class="feature-card glass-card">
+        <div class="feature-icon">📦</div>
+        <h3>ZIP Download</h3>
+        <p>All extracted frames neatly packaged in a single ZIP file.</p>
+      </div>
+      <div class="feature-card glass-card">
+        <div class="feature-icon">👁️</div>
+        <h3>Frame Preview</h3>
+        <p>Preview extracted frames before downloading the full package.</p>
+      </div>
+      <div class="feature-card glass-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Private & Secure</h3>
+        <p>Files are processed on your server and cleaned up after download.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-section" id="how-it-works">
+    <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Upload Video</h3>
+        <p>Drag & drop or browse to select your video file.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>Configure</h3>
+        <p>Choose extraction mode, format, and quality settings.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Download</h3>
+        <p>Preview frames and download them all as a ZIP.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Built with ❤️ &mdash; <strong>FrameSnap</strong> Video to Image Converter</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
